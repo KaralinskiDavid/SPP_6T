@@ -1,0 +1,25 @@
+﻿<div class="raw">
+<div class="card col-8" style="width: 40rem;">
+    <div class="card-body">
+        <h4 class="card-title">{{task?.name}}</h4>
+        <h6 class="card-subtitle mb-2 mark small strong text-white" style="width:max-content;" [style.backgroundColor]="getBgColor(task.taskStatus.id)">{{task?.taskStatus?.name}}</h6>
+        <p class="card-text">{{task?.description}}</p>
+        <input type="datetime-local" [value]="task.completionDate.slice(0,19)" readonly />
+        <button type="button" class="btn btn-info m-2" (click)="onEditClicked()">Edit</button>
+        <button type="button" class="btn btn-danger" (click)="onDeleteClicked()">Delete</button>
+    </div>
+</div>
+<div class="col-md-4 col-4">
+    <span class="document-header cursor-pointer" (click)="drop2.showFileSelector()">Files<i class="fa fa-plus m-1 cursor-pointer" title="Максимальный размер файла 10мб. Допустимые форматы: pdf, jpeg, png, doc, docx, xls, xlsx"></i></span>
+    <div class="file-contaner">
+        <ngx-dropzone #drop2 [accept]="ALLOW_FILE_EXT" [maxFileSize]="ALLOW_FILE_SIZE" (change)="onFileSelect($event)">
+            <ngx-dropzone-label>No uploaded files</ngx-dropzone-label>
+            <ngx-dropzone-preview  *ngFor="let file of task.files" [removable]="true" (removed)="onFileRemove(file)" (click)="onFileItemClick(file)" >
+                <ngx-dropzone-label>
+                    <span class="file-name" title="{{file.name}}">{{file.name}}</span>
+                </ngx-dropzone-label>
+            </ngx-dropzone-preview>
+        </ngx-dropzone>
+    </div>
+</div>
+</div>

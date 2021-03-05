@@ -1,0 +1,31 @@
+﻿<form [formGroup]="loginForm" novalidate class="position-absolute" style="width:20%; height:20%; top:35%;left:40%;">
+    <h1 class="display-4 text-center mb-1">Log in</h1>
+    <label class="text-muted">Email</label>
+    <div class="input-group mb-3">
+        <input type="email" class="form-control" formControlName="email" [(ngModel)]="email">
+    </div>
+    <div *ngIf="loginForm.controls['email'].invalid && (loginForm.controls['email'].dirty || loginForm.controls['email'].touched)"
+         class="alert alert-danger">
+        <div *ngIf="loginForm.controls['email'].errors.required">
+            Email is required.
+        </div>
+        <div *ngIf="loginForm.controls['email'].errors.email">
+            Incorrect email.
+        </div>
+    </div>
+    <label class="text-muted">Password</label>
+    <div class="input-group mb-3">
+        <input type="password" class="form-control" formControlName="password" [(ngModel)]="password">
+    </div>
+    <div *ngIf="loginForm.controls['password'].invalid && (loginForm.controls['password'].dirty || loginForm.controls['password'].touched)"
+         class="alert alert-danger">
+        <div *ngIf="loginForm.controls['password'].errors.required">
+            Password is required.
+        </div>
+    </div>
+    <button (click)="tryLogin()" class="btn btn-light w-100" [disabled]="loginForm.invalid">Log in</button>
+    <p class="text-whitesmoke text-center mt-3">
+        <small>Do not have an account? </small>
+        <a class="text-muted" routerLink="/register"><small>Sign Up</small></a>
+    </p>
+</form>

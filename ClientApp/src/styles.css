@@ -1,0 +1,30 @@
+﻿.collapse-btn {
+    cursor: pointer;
+}
+
+    .collapse-btn[aria-expanded=true]::before {
+        margin: 0 5px 0 5px;
+        position: relative;
+        bottom: 2px;
+        font-family: "Font Awesome 5 Free";
+        font-weight: 900;
+        content: "\f107";
+        float: left;
+    }
+
+    .collapse-btn[aria-expanded=false]::before {
+        margin: 0 5px 0 5px;
+        position: relative;
+        bottom: 2px;
+        font-family: "Font Awesome 5 Free";
+        font-weight: 900;
+        content: "\f105";
+        float: left;
+    }
+
+    .collapse-btn p {
+        font-size: 1rem;
+        margin-bottom: .5rem;
+        font-weight: 500;
+        line-height: 1.2;
+    }

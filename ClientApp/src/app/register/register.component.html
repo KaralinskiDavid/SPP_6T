@@ -1,0 +1,58 @@
+﻿<form [formGroup]="registerForm" novalidate class="position-absolute" style="width:20%; height:20%; top:25%;left:40%;">
+    <h1 class="display-4 text-center mb-1">Register</h1>
+    <label class="text-muted">Name</label>
+    <div class="input-group mb-3">
+        <input type="text" class="form-control" formControlName="name" (keyPress)="checkName()" (change)="checkName()" [(ngModel)]="user.userName">
+    </div>
+    <div *ngIf="(registerForm.controls['name'].invalid || duplicateName) && (registerForm.controls['name'].dirty || registerForm.controls['name'].touched)"
+         class="alert alert-danger">
+        <div *ngIf="registerForm.controls['name'].invalid && (registerForm.controls['name'].dirty || registerForm.controls['name'].touched) && registerForm.controls['name'].errors.required">
+            Name is required.
+        </div>
+        <div *ngIf="duplicateName">
+            This name is already in use.
+        </div>
+    </div>
+    <label class="text-muted">Email</label>
+    <div class="input-group mb-3">
+        <input type="email" class="form-control" formControlName="email" [(ngModel)]="user.email">
+    </div>
+    <div *ngIf="registerForm.controls['email'].invalid && (registerForm.controls['email'].dirty || registerForm.controls['email'].touched)"
+         class="alert alert-danger">
+        <div *ngIf="registerForm.controls['email'].errors.required">
+            Email is required.
+        </div>
+        <div *ngIf="registerForm.controls['email'].errors.email">
+            Incorrect email.
+        </div>
+    </div>
+    <label class="text-muted">Password</label>
+    <div class="input-group mb-3">
+        <input type="password" class="form-control" formControlName="password" [(ngModel)]="user.password">
+    </div>
+    <div *ngIf="registerForm.controls['password'].invalid && (registerForm.controls['password'].dirty || registerForm.controls['password'].touched)"
+         class="alert alert-danger">
+        <div *ngIf="registerForm.controls['password'].errors.required">
+            Password is required.
+        </div>
+        <div *ngIf="registerForm.controls['password'].errors.minlength">
+            Password must be at least 6 characters long.
+        </div>
+    </div>
+    <label class="text-muted">Confirm password</label>
+    <div class="input-group mb-3">
+        <input type="password" class="form-control" formControlName="confirmPassword">
+    </div>
+    <div *ngIf="registerForm.controls['password'].value!=registerForm.controls['confirmPassword'].value && (registerForm.controls['confirmPassword'].dirty || registerForm.controls['confirmPassword'].touched)"
+         class="alert alert-danger">
+        <div>
+            Password mismatch.
+        </div>
+    </div>
+    <button (click)="tryRegister()" class="btn btn-light w-100" [disabled]="registerForm.controls['password'].value!=registerForm.controls['confirmPassword'].value ||
+            registerForm.controls['password'].invalid || duplicateName || registerForm.controls['name'].invalid || registerForm.controls['email'].invalid">Create account</button>
+    <p class="text-whitesmoke text-center mt-3">
+        <small>Already have an account? </small>
+        <a class="text-muted" routerLink="/login"><small>Log in</small></a>
+    </p>
+</form>

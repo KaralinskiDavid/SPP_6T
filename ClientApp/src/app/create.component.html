@@ -1,0 +1,29 @@
+﻿<div class="modal-header">
+    <h4 class="modal-title" id="modal-title">Create task</h4>
+    <button type="button" class="btn-close" aria-describedby="modal-title" (click)="modal.dismiss('Cross click')">
+    </button>
+</div>
+<div class="modal-body">
+    <label class="text-muted">Name</label>
+    <div class="input-group mb-3">
+        <input type="text" class="form-control" [(ngModel)]="createdTask.name">
+    </div>
+    <label class="text-muted">Description</label>
+    <div class="input-group mb-3">
+        <textarea class="form-control" id="exampleFormControlTextarea1" rows="3" [(ngModel)]="createdTask.description"></textarea>
+    </div>
+    <label class="text-muted">Status</label>
+    <div class="input-group mb-3">
+        <select class="form-select" aria-label="Default select example" [(ngModel)]="statusIndex">
+            <option *ngFor="let status of statuses; let i = index" value="{{i}}">{{status.name}}</option>
+        </select>
+    </div>
+    <label class="text-muted">Completion date</label>
+    <div class="input-group mb-3">
+        <input type="datetime-local" [(ngModel)]="createdTask.completionDate" />
+    </div>
+</div>
+<div class="modal-footer">
+    <button type="button" class="btn btn-outline-secondary" (click)="modal.dismiss('Cancel')">Cancel</button>
+    <button type="button" class="btn btn-outline-dark" (click)="modal.close('Ok')" [disabled]="createdTask?.name.length<=0">Create</button>
+</div>
