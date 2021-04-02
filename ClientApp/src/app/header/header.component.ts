@@ -1,5 +1,6 @@
 ﻿import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { AuthService } from '../services/auth.service';
 import { CookieService } from '../services/cookie.service';
 
 @Component({
@@ -7,6 +8,7 @@ import { CookieService } from '../services/cookie.service';
     templateUrl: './header.component.html',
     providers: [CookieService]
 })
+
 export class HeaderComponent implements OnInit {
     userName: string;
     constructor(private cookieService: CookieService, public router: Router) { }

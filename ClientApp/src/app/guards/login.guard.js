@@ -13,7 +13,7 @@ let LoginGuard = class LoginGuard {
         this.cookieService = cookieService;
     }
     canActivate(next, state) {
-        const token = this.cookieService.get('access_token');
+        let token = this.cookieService.get('access_token');
         if (!token) {
             return true;
         }

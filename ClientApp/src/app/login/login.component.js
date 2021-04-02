@@ -9,13 +9,13 @@ import { FormGroup, FormControl, Validators } from '@angular/forms';
 import { AuthService } from '../services/auth.service';
 import { CookieService } from '../services/cookie.service';
 import { JwtHelperService } from '@auth0/angular-jwt';
-const jwtHelper = new JwtHelperService();
 let LoginComponent = class LoginComponent {
     constructor(_authService, _cookieService, toastr, router) {
         this._authService = _authService;
         this._cookieService = _cookieService;
         this.toastr = toastr;
         this.router = router;
+        this.jwtHelper = new JwtHelperService();
         this.email = '';
         this.password = '';
         this.loginForm = new FormGroup({
@@ -30,13 +30,25 @@ let LoginComponent = class LoginComponent {
         this._authService.signIn(this.email, this.password).subscribe((result) => {
             if (result.access_token) {
                 this._cookieService.set('access_token', result.access_token);
-                this._cookieService.set('userName', jwtHelper.decodeToken(result.access_token).given_name);
+                this._cookieService.set('userName', this.jwtHelper.decodeToken(result.access_token).given_name);
                 this.router.navigate(['/tasks']);
             }
         }, error => {
             console.log(error);
             this.toastr.error('Wrong email or password');
         });
+    }
+    tryLoginHub() {
+        this._authService.signInHub(this.email, this.password, this.tryLoginCallback, this);
+    }
+    tryLoginCallback(result, that) {
+        if (result == null) {
+            that.toastr.error("Wrong email or password");
+            return;
+        }
+        that._cookieService.set('access_token', result);
+        that._cookieService.set('userName', that.jwtHelper.decodeToken(result).given_name);
+        that.router.navigate(['/tasks']);
     }
     ngOnInit() {
     }

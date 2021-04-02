@@ -31,12 +31,34 @@ let RegisterComponent = class RegisterComponent {
             this.toastr.error("User with this email is already registered");
         });
     }
+    tryRegisterHub() {
+        this._authService.signUpHub(this.user, this.registerCallback);
+    }
+    registerCallback(result) {
+        if (!result) {
+            this.toastr.error("User with this email is already registered");
+            return;
+        }
+        this.toastr.success('Registered');
+        this.router.navigate(['/login']);
+    }
     checkName() {
         this._authService.checkUserName(this.user.userName).subscribe((result) => {
             this.duplicateName = !result;
         });
     }
+    checkNameHub() {
+        this._authService.checkUserNameHub(this.user.userName, this.checkNameCallback, this);
+    }
+    checkNameCallback(result, that) {
+        that.duplicateName = !result;
+    }
     ngOnInit() {
+        //this.hubConnection = new HubConnectionBuilder().withUrl('https://localhost:5001/authHub', {
+        //    skipNegotiation: true,
+        //    transport: HttpTransportType.WebSockets
+        //}).build();
+        //this.hubConnection.start();
     }
 };
 RegisterComponent = __decorate([

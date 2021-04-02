@@ -32,12 +32,13 @@ namespace SPP_1.Service.Impl
                 Account user = new();
                 if ((user = await _userManager.FindByEmailAsync(request.Email)) == null)
                     return null;
-                if ((await _signInManager.PasswordSignInAsync(user.UserName, request.Password, false, false)).Succeeded)
-                    return await _userManager.FindByEmailAsync(request.Email);
+                if (await _userManager.CheckPasswordAsync(user, request.Password))
+                    return user;
                 return null;
             }
-            catch
+            catch(Exception ex)
             {
+                Console.WriteLine(ex.Message);
                 return null;
             }
         }

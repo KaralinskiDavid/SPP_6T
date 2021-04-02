@@ -1,6 +1,6 @@
 ﻿<app-header></app-header>
 <div class="row">
-    <div class="col-2 bg-dark text-white-50">
+    <div class="col-2 bg-dark text-white-50" style="min-height: 94vh;">
         <h1 class="display-4">Filter</h1>
             <span class="" (click)="isByStatusCollapsed = !isByStatusCollapsed" [attr.aria-expanded]="!isByStatusCollapsed" aria-controls="isByStatusCollapsed">
                 <p *ngIf="isByStatusCollapsed" class="mb-0">⮞ By status</p>
@@ -38,7 +38,7 @@
         <ul class="list-group">
             <li class="list-group-item" *ngFor="let task of displayedTasks" style="background-color:#fffdd0">
                 <task-comp [task]="task" [statuses]="statuses"
-                           (onDelete)="deleteTask($event)" (onEdit)="updateTask($event)"></task-comp>
+                           (onDelete)="deleteTaskHub($event)" (onEdit)="updateTaskHub($event)"></task-comp>
             </li>
         </ul>
         <nav aria-label="...">

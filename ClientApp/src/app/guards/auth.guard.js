@@ -13,7 +13,7 @@ let AuthorizeGuard = class AuthorizeGuard {
         this.cookieService = cookieService;
     }
     canActivate(next, state) {
-        const token = this.cookieService.get('access_token');
+        let token = this.cookieService.get('access_token');
         if (token) {
             if (jwtHelper.isTokenExpired(token)) {
                 this.cookieService.remove("access_token");

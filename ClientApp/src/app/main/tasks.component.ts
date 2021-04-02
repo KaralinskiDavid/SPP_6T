@@ -5,12 +5,15 @@ import { CreateModal } from '../create.component';
 import { TaskService } from '../services/task.service';
 import { Task } from '../classes/task';
 import { TaskStatus } from '../classes/taskStatus';
+import { HttpClient } from '@angular/common/http';
+import { FileService } from '../services/file.service';
 
 @Component({
     selector: 'tasks',
     templateUrl: './tasks.component.html',
-    providers: [TaskService]
+    providers: [TaskService, FileService]
 })
+
 export class TasksComponent implements OnInit{
     tasks: Task[];
     filteredTasks: Task[];
@@ -24,7 +27,8 @@ export class TasksComponent implements OnInit{
     isByDateCollapsed: boolean;
     ascending = true;
 
-    constructor(private dataService: TaskService, private toastr: ToastrService, private _modalService: NgbModal) {
+
+    constructor(private dataService: TaskService, private toastr: ToastrService, private _modalService: NgbModal, private _fileService: FileService) {
         this.tasks = null;
         this.filteredTasks = null;
         this.filtering = null;
@@ -64,9 +68,23 @@ export class TasksComponent implements OnInit{
         );
     }
 
-    ngOnInit() {
-        this.loadTasks();
+    getStatusesCallback(result, caller) {
+        caller.statuses = result;
+        caller.filtering = new Array(caller.statuses.length).fill(true);
+        caller.filterByStatus(caller.filtering);
     }
+
+    getTasksCallback(result, caller) {
+        caller.tasks = result;
+        caller.filteredTasks = new Array(caller.tasks.length);
+        Object.assign(caller.filteredTasks, caller.tasks);
+        caller.dataService.getTaskSatusesHub(caller.getStatusesCallback, caller);
+    }
+
+    ngOnInit() {
+        this.dataService.getTasksHub(this.getTasksCallback, this);
+    }
+
 
     filterByStatus(filtering:boolean[]) {
         this.filteredTasks = this.tasks.filter(function (value){
@@ -99,17 +117,17 @@ export class TasksComponent implements OnInit{
     }
 
     sortAscendig(a: Task, b: Task) {
-        if (new Date(a.completionDate.slice(0,19)) < new Date(b.completionDate.slice(0,19)))
+        if (new Date(a.completionDate?.slice(0,19)) < new Date(b.completionDate?.slice(0,19)))
             return 1;
-        else if (new Date(a.completionDate.slice(0,19)) > new Date(b.completionDate.slice(0,19)))
+        else if (new Date(a.completionDate?.slice(0,19)) > new Date(b.completionDate?.slice(0,19)))
             return -1;
         return 0;
     }
 
     sortDescending(a: Task, b: Task) {
-        if (new Date(a.completionDate.slice(0, 19)) > new Date(b.completionDate.slice(0, 19)))
+        if (new Date(a.completionDate?.slice(0, 19)) > new Date(b.completionDate?.slice(0, 19)))
             return 1;
-        else if (new Date(a.completionDate.slice(0, 19)) < new Date(b.completionDate.slice(0, 19)))
+        else if (new Date(a.completionDate?.slice(0, 19)) < new Date(b.completionDate?.slice(0, 19)))
             return -1;
         return 0;
     }
@@ -127,6 +145,22 @@ export class TasksComponent implements OnInit{
                 this.toastr.error('Something went wrong');
             }
         );
+    }
+
+    deleteTaskCallback(id, result, caller) {
+        if (!result) {
+            caller.toastr.error("Something went wrong");
+            return;
+        }
+        caller.tasks = caller.tasks.filter(function (value) {
+            return value.id != id;
+        });
+        caller.filterByStatus(caller.filtering);
+        caller.toastr.success("Deleted successfull");
+    }
+
+    deleteTaskHub(id: number) {
+        this.dataService.deleteTaskHub(id, this.deleteTaskCallback, this);
     }
 
     updateTask(task: Task) {
@@ -147,6 +181,25 @@ export class TasksComponent implements OnInit{
         );
     }
 
+    updateTaskCallBack(task: Task, result, caller) {
+        if (result == null) {
+            caller.toastr.error("Something went wrong");
+            return;
+        }
+        for (let i = 0; i < caller.tasks.length; i++) {
+            if (caller.tasks[i].id == task.id) {
+                caller.tasks[i] = task;
+                break;
+            }
+        }
+        caller.filterByStatus(caller.filtering);
+        caller.toastr.success("Edited successfull");
+    }
+
+    updateTaskHub(task: Task) {
+        this.dataService.updateTaskHub(task, this.updateTaskCallBack, this);
+    }
+
     onCreateClicked() {
         const modalRef = this._modalService.open(CreateModal);
         modalRef.componentInstance.statuses = this.statuses;
@@ -154,15 +207,32 @@ export class TasksComponent implements OnInit{
             if (result == "Ok") {
                 var createdTask = modalRef.componentInstance.createdTask;
                 createdTask.taskStatus = this.statuses[modalRef.componentInstance.statusIndex];
-                this.createTask(createdTask);
+                //this.createTaskHub(createdTask);
+                this.createTask(createdTask, modalRef.componentInstance.addedFiles);
             };
         });
     }
 
-    createTask(task: Task) {
+    createTask(task: Task, files: []) {
         this.dataService.createTask(task).subscribe((result: any) => {
             result.taskStatus = this.statuses.find(function (value) {
                 return value.id = result.taskStatusId;
+            });
+            files.forEach((item: any) => {
+                const formData = new FormData();
+                formData.append("uploadedFile", item);
+                this._fileService.uploadFile(formData, item.name, result.id).subscribe((response: any) => {
+                    if (!result.files)
+                        result.files = new Array();
+                    result.files.push(response);
+                    console.log(response);
+                    this.toastr.success('File saved');
+                },
+                    error => {
+                        console.log(error);
+                        this.toastr.error('Something went wrong');
+                    }
+                );
             });
             this.tasks.push(result);
             this.filterByStatus(this.filtering);
@@ -173,6 +243,23 @@ export class TasksComponent implements OnInit{
                 this.toastr.error('Something went wrong');
             }
         );
+    }
+
+    createTaskCallback(task: Task, result, caller) {
+        if (result == null) {
+            caller.toastr.error("Something went wrong");
+            return;
+        }
+        result.taskStatus = caller.statuses.find(function (value) {
+            return value.id = result.taskStatusId;
+        });
+        caller.tasks.push(result);
+        caller.filterByStatus(caller.filtering);
+        caller.toastr.success("Created successfull");
+    }
+
+    createTaskHub(task: Task) {
+        this.dataService.createTaskHub(task, this.createTaskCallback, this);
     }
 
 }

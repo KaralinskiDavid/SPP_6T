@@ -6,9 +6,27 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 };
 import { Component } from '@angular/core';
 import { Task } from './classes/task';
+import { FileService } from './services/file.service';
 let CreateModal = class CreateModal {
-    constructor(modal) {
+    constructor(modal, _fileService, toastr) {
         this.modal = modal;
+        this._fileService = _fileService;
+        this.toastr = toastr;
+        this.addedFiles = new Array();
+    }
+    onFileSelect(event) {
+        console.log(event);
+        event.addedFiles.forEach((item) => {
+            //if (this.task.files.find((function (value) {
+            //    return value.name = item.name;
+            //})))
+            //    item.name += "1";
+            this.addedFiles.push(item);
+        });
+    }
+    onFileRemove(event) {
+        console.log(event);
+        this.addedFiles = this.addedFiles.filter((value) => value.name != event.name);
     }
     ngOnInit() {
         this.createdTask = new Task();
@@ -19,7 +37,8 @@ let CreateModal = class CreateModal {
 CreateModal = __decorate([
     Component({
         selector: 'app-create-modal',
-        templateUrl: './create.component.html'
+        templateUrl: './create.component.html',
+        providers: [FileService]
     })
 ], CreateModal);
 export { CreateModal };

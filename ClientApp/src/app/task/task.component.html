@@ -3,8 +3,8 @@
     <div class="card-body">
         <h4 class="card-title">{{task?.name}}</h4>
         <h6 class="card-subtitle mb-2 mark small strong text-white" style="width:max-content;" [style.backgroundColor]="getBgColor(task.taskStatus.id)">{{task?.taskStatus?.name}}</h6>
-        <p class="card-text">{{task?.description}}</p>
-        <input type="datetime-local" [value]="task.completionDate.slice(0,19)" readonly />
+        <p class="card-text text-overflow" title={{task?.description}}>{{task?.description}}</p>
+        <input type="datetime-local" [value]="task.completionDate?.slice(0,19)" readonly />
         <button type="button" class="btn btn-info m-2" (click)="onEditClicked()">Edit</button>
         <button type="button" class="btn btn-danger" (click)="onDeleteClicked()">Delete</button>
     </div>

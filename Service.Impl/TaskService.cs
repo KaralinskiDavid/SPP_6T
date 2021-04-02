@@ -34,8 +34,9 @@ namespace SPP_1.Service.Impl
                 if (result > 0)
                     return _mapper.Map<PostTasksTaskResponseModel>(model);
             }
-            catch
+            catch(Exception ex)
             {
+                Console.WriteLine(ex.Message);
                 return null;
             }
             return null;

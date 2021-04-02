@@ -18,11 +18,9 @@ namespace SPP_1.Controllers
     public class AuthController : ControllerBase
     {
         private readonly IAuthService _authService;
-        private readonly IOptions<JwtOptions> _jwtOptions;
         
-        public AuthController(IOptions<JwtOptions> jwtOptions, IAuthService authService)
+        public AuthController(IAuthService authService)
         {
-            _jwtOptions = jwtOptions;
             _authService = authService;
         }
 

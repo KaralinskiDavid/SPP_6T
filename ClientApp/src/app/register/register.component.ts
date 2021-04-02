@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { Account } from '../classes/account';
 import { AuthService } from '../services/auth.service';
+import { HttpTransportType, HubConnection, HubConnectionBuilder, HubConnectionState } from '@microsoft/signalr';
 
 @Component({
     selector: 'app-register-component',
@@ -15,6 +16,7 @@ export class RegisterComponent implements OnInit {
     user: Account;
     registerForm: FormGroup;
     duplicateName = false;
+    hubConnection: HubConnection;
 
     tryRegister() {
         this._authService.signUp(this.user).subscribe((result:any) => {
@@ -28,10 +30,31 @@ export class RegisterComponent implements OnInit {
         );
     }
 
+    tryRegisterHub() {
+        this._authService.signUpHub(this.user, this.registerCallback);
+    }
+
+    registerCallback(result: boolean) {
+        if (!result) {
+            this.toastr.error("User with this email is already registered");
+            return;
+        }
+        this.toastr.success('Registered');
+        this.router.navigate(['/login']);
+    }
+
     checkName() {
         this._authService.checkUserName(this.user.userName).subscribe((result: boolean) => {
             this.duplicateName = !result;
         });
+    }
+
+    checkNameHub() {
+        this._authService.checkUserNameHub(this.user.userName, this.checkNameCallback, this);
+    }
+
+    checkNameCallback(result: boolean, that) {
+        that.duplicateName = !result;
     }
 
     constructor(private _authService: AuthService, public router: Router, public toastr: ToastrService) {
@@ -43,7 +66,12 @@ export class RegisterComponent implements OnInit {
             "confirmPassword": new FormControl("", [Validators.required, Validators.minLength(6)])
         });
     }
-    ngOnInit() {
 
+    ngOnInit() {
+        //this.hubConnection = new HubConnectionBuilder().withUrl('https://localhost:5001/authHub', {
+        //    skipNegotiation: true,
+        //    transport: HttpTransportType.WebSockets
+        //}).build();
+        //this.hubConnection.start();
     }
 }

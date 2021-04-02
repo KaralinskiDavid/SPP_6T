@@ -22,6 +22,7 @@ using SPP_1.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using SPP_1.Hubs;
 
 namespace SPP_1
 {
@@ -37,7 +38,6 @@ namespace SPP_1
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllers();
             var jwtOptions = Configuration.GetSection("Auth");
             services.Configure<JwtOptions>(jwtOptions);
             var opts = jwtOptions.Get<JwtOptions>();
@@ -113,6 +113,22 @@ namespace SPP_1
                     ValidateIssuerSigningKey = true,
                     ClockSkew = TimeSpan.Zero
                 };
+                options.Events = new JwtBearerEvents
+                {
+                    OnMessageReceived = context =>
+                    {
+                        var accessToken = context.Request.Query["access_token"];
+
+                        var path = context.HttpContext.Request.Path;
+
+                        if (!string.IsNullOrEmpty(accessToken) &&
+                                (path.StartsWithSegments("/tasksHub")))
+                        {
+                            context.Token = accessToken;
+                        }
+                        return Task.CompletedTask;
+                    }
+                };
             });
             services.AddAuthorization();
 
@@ -126,6 +142,8 @@ namespace SPP_1
             {
                 opts.RootPath = "ClientApp/dist";
             });
+            services.AddSignalR();
+            services.AddControllers();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -165,6 +183,8 @@ namespace SPP_1
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+                endpoints.MapHub<TasksHub>("/tasksHub");
+                endpoints.MapHub<AuthHub>("/authHub");
             });
             DbSeed.EnsurePopulated(app);
             app.UseSpa(spa =>

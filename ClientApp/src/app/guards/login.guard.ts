@@ -3,6 +3,7 @@ import { CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot, Router } from
 import { Observable } from 'rxjs';
 import { CookieService } from '../services/cookie.service';
 import { JwtHelperService } from '@auth0/angular-jwt';
+import { AuthService } from '../services/auth.service';
 
 const jwtHelper = new JwtHelperService();
 
@@ -16,7 +17,7 @@ export class LoginGuard implements CanActivate {
     canActivate(
         next: ActivatedRouteSnapshot,
         state: RouterStateSnapshot): Observable<any> | Promise<any> | boolean {
-        const token = this.cookieService.get('access_token');
+        let token = this.cookieService.get('access_token');
         if (!token) {
             return true;
         }

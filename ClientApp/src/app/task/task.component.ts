@@ -11,6 +11,7 @@ import { ToastrService } from 'ngx-toastr';
 @Component({
     selector: 'task-comp',
     templateUrl: './task.component.html',
+    styleUrls: ['./task.component.css'],
     providers:[FileService]
 })
 export class TaskComponent {
@@ -61,13 +62,18 @@ export class TaskComponent {
 
         console.log(event);
         event.addedFiles.forEach((item) => {
-            //if (this.task.files.find((function (value) {
-            //    return value.name = item.name;
-            //})))
-            //    item.name += "1";
+            let itemName = item.name;
+            if (event.addedFiles.find((function (value) {
+                return value.name == itemName;
+            })))
+                itemName = "1"+itemName;
+            if (this.task.files != null && this.task.files.find((function (value) {
+                return value.name == itemName;
+            })))
+                itemName = "1"+itemName;
             const formData = new FormData();
             formData.append("uploadedFile", item);
-            this._fileService.uploadFile(formData, item.name, this.task.id).subscribe((response: any) => {
+            this._fileService.uploadFile(formData, itemName, this.task.id).subscribe((response: any) => {
                 this.task.files.push(response);
                 console.log(response);
                 this.toastr.success('File saved');

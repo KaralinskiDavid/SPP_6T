@@ -22,7 +22,20 @@
     <div class="input-group mb-3">
         <input type="datetime-local" [(ngModel)]="createdTask.completionDate" />
     </div>
-</div>
+        <div class="input-group mb-3">
+            <span class="document-header cursor-pointer text-muted" (click)="drop2.showFileSelector()">Files<i class="fa fa-plus m-1 cursor-pointer" title="Максимальный размер файла 10мб. Допустимые форматы: pdf, jpeg, png, doc, docx, xls, xlsx"></i></span>
+            <div class="file-contaner" style="width:100%;">
+                <ngx-dropzone #drop2 (change)="onFileSelect($event)">
+                    <ngx-dropzone-label>No uploaded files</ngx-dropzone-label>
+                    <ngx-dropzone-preview *ngFor="let file of addedFiles" [removable]="true" (removed)="onFileRemove(file)">
+                        <ngx-dropzone-label>
+                            <span class="file-name" title="{{file.name}}">{{file.name}}</span>
+                        </ngx-dropzone-label>
+                    </ngx-dropzone-preview>
+                </ngx-dropzone>
+            </div>
+        </div>
+    </div>
 <div class="modal-footer">
     <button type="button" class="btn btn-outline-secondary" (click)="modal.dismiss('Cancel')">Cancel</button>
     <button type="button" class="btn btn-outline-dark" (click)="modal.close('Ok')" [disabled]="createdTask?.name.length<=0">Create</button>

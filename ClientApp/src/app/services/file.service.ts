@@ -6,6 +6,7 @@ import { File } from '../classes/file';
 export class FileService {
     private url = "/api/files";
 
+   
     constructor(private http: HttpClient) { }
 
     uploadFile(data: FormData, name: string, taskModelId: number) {

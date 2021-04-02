@@ -1,0 +1,6 @@
+﻿.text-overflow {
+    height: 5vh;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}

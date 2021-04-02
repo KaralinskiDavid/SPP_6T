@@ -7,11 +7,13 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 import { Component } from '@angular/core';
 import { CreateModal } from '../create.component';
 import { TaskService } from '../services/task.service';
+import { FileService } from '../services/file.service';
 let TasksComponent = class TasksComponent {
-    constructor(dataService, toastr, _modalService) {
+    constructor(dataService, toastr, _modalService, _fileService) {
         this.dataService = dataService;
         this.toastr = toastr;
         this._modalService = _modalService;
+        this._fileService = _fileService;
         this.ascending = true;
         this.tasks = null;
         this.filteredTasks = null;
@@ -45,8 +47,19 @@ let TasksComponent = class TasksComponent {
             this.toastr.error('Something went wrong');
         });
     }
+    getStatusesCallback(result, caller) {
+        caller.statuses = result;
+        caller.filtering = new Array(caller.statuses.length).fill(true);
+        caller.filterByStatus(caller.filtering);
+    }
+    getTasksCallback(result, caller) {
+        caller.tasks = result;
+        caller.filteredTasks = new Array(caller.tasks.length);
+        Object.assign(caller.filteredTasks, caller.tasks);
+        caller.dataService.getTaskSatusesHub(caller.getStatusesCallback, caller);
+    }
     ngOnInit() {
-        this.loadTasks();
+        this.dataService.getTasksHub(this.getTasksCallback, this);
     }
     filterByStatus(filtering) {
         this.filteredTasks = this.tasks.filter(function (value) {
@@ -75,16 +88,18 @@ let TasksComponent = class TasksComponent {
         this.moveToPage(this.currentPage);
     }
     sortAscendig(a, b) {
-        if (new Date(a.completionDate.slice(0, 19)) < new Date(b.completionDate.slice(0, 19)))
+        var _a, _b, _c, _d;
+        if (new Date((_a = a.completionDate) === null || _a === void 0 ? void 0 : _a.slice(0, 19)) < new Date((_b = b.completionDate) === null || _b === void 0 ? void 0 : _b.slice(0, 19)))
             return 1;
-        else if (new Date(a.completionDate.slice(0, 19)) > new Date(b.completionDate.slice(0, 19)))
+        else if (new Date((_c = a.completionDate) === null || _c === void 0 ? void 0 : _c.slice(0, 19)) > new Date((_d = b.completionDate) === null || _d === void 0 ? void 0 : _d.slice(0, 19)))
             return -1;
         return 0;
     }
     sortDescending(a, b) {
-        if (new Date(a.completionDate.slice(0, 19)) > new Date(b.completionDate.slice(0, 19)))
+        var _a, _b, _c, _d;
+        if (new Date((_a = a.completionDate) === null || _a === void 0 ? void 0 : _a.slice(0, 19)) > new Date((_b = b.completionDate) === null || _b === void 0 ? void 0 : _b.slice(0, 19)))
             return 1;
-        else if (new Date(a.completionDate.slice(0, 19)) < new Date(b.completionDate.slice(0, 19)))
+        else if (new Date((_c = a.completionDate) === null || _c === void 0 ? void 0 : _c.slice(0, 19)) < new Date((_d = b.completionDate) === null || _d === void 0 ? void 0 : _d.slice(0, 19)))
             return -1;
         return 0;
     }
@@ -99,6 +114,20 @@ let TasksComponent = class TasksComponent {
             console.log(error);
             this.toastr.error('Something went wrong');
         });
+    }
+    deleteTaskCallback(id, result, caller) {
+        if (!result) {
+            caller.toastr.error("Something went wrong");
+            return;
+        }
+        caller.tasks = caller.tasks.filter(function (value) {
+            return value.id != id;
+        });
+        caller.filterByStatus(caller.filtering);
+        caller.toastr.success("Deleted successfull");
+    }
+    deleteTaskHub(id) {
+        this.dataService.deleteTaskHub(id, this.deleteTaskCallback, this);
     }
     updateTask(task) {
         this.dataService.updateTask(task).subscribe(result => {
@@ -115,6 +144,23 @@ let TasksComponent = class TasksComponent {
             this.toastr.error('Something went wrong');
         });
     }
+    updateTaskCallBack(task, result, caller) {
+        if (result == null) {
+            caller.toastr.error("Something went wrong");
+            return;
+        }
+        for (let i = 0; i < caller.tasks.length; i++) {
+            if (caller.tasks[i].id == task.id) {
+                caller.tasks[i] = task;
+                break;
+            }
+        }
+        caller.filterByStatus(caller.filtering);
+        caller.toastr.success("Edited successfull");
+    }
+    updateTaskHub(task) {
+        this.dataService.updateTaskHub(task, this.updateTaskCallBack, this);
+    }
     onCreateClicked() {
         const modalRef = this._modalService.open(CreateModal);
         modalRef.componentInstance.statuses = this.statuses;
@@ -122,15 +168,30 @@ let TasksComponent = class TasksComponent {
             if (result == "Ok") {
                 var createdTask = modalRef.componentInstance.createdTask;
                 createdTask.taskStatus = this.statuses[modalRef.componentInstance.statusIndex];
-                this.createTask(createdTask);
+                //this.createTaskHub(createdTask);
+                this.createTask(createdTask, modalRef.componentInstance.addedFiles);
             }
             ;
         });
     }
-    createTask(task) {
+    createTask(task, files) {
         this.dataService.createTask(task).subscribe((result) => {
             result.taskStatus = this.statuses.find(function (value) {
                 return value.id = result.taskStatusId;
+            });
+            files.forEach((item) => {
+                const formData = new FormData();
+                formData.append("uploadedFile", item);
+                this._fileService.uploadFile(formData, item.name, result.id).subscribe((response) => {
+                    if (!result.files)
+                        result.files = new Array();
+                    result.files.push(response);
+                    console.log(response);
+                    this.toastr.success('File saved');
+                }, error => {
+                    console.log(error);
+                    this.toastr.error('Something went wrong');
+                });
             });
             this.tasks.push(result);
             this.filterByStatus(this.filtering);
@@ -140,12 +201,27 @@ let TasksComponent = class TasksComponent {
             this.toastr.error('Something went wrong');
         });
     }
+    createTaskCallback(task, result, caller) {
+        if (result == null) {
+            caller.toastr.error("Something went wrong");
+            return;
+        }
+        result.taskStatus = caller.statuses.find(function (value) {
+            return value.id = result.taskStatusId;
+        });
+        caller.tasks.push(result);
+        caller.filterByStatus(caller.filtering);
+        caller.toastr.success("Created successfull");
+    }
+    createTaskHub(task) {
+        this.dataService.createTaskHub(task, this.createTaskCallback, this);
+    }
 };
 TasksComponent = __decorate([
     Component({
         selector: 'tasks',
         templateUrl: './tasks.component.html',
-        providers: [TaskService]
+        providers: [TaskService, FileService]
     })
 ], TasksComponent);
 export { TasksComponent };

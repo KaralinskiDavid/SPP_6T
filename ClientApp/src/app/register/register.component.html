@@ -2,7 +2,7 @@
     <h1 class="display-4 text-center mb-1">Register</h1>
     <label class="text-muted">Name</label>
     <div class="input-group mb-3">
-        <input type="text" class="form-control" formControlName="name" (keyPress)="checkName()" (change)="checkName()" [(ngModel)]="user.userName">
+        <input type="text" class="form-control" formControlName="name" (keyPress)="checkNameHub()" (change)="checkNameHub()" [(ngModel)]="user.userName">
     </div>
     <div *ngIf="(registerForm.controls['name'].invalid || duplicateName) && (registerForm.controls['name'].dirty || registerForm.controls['name'].touched)"
          class="alert alert-danger">

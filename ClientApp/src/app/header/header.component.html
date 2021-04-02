@@ -2,11 +2,11 @@
     <div class="container-fluid">
         <a class="navbar-brand disabled" >SPP</a>
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
-            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                <li *ngIf="userName!=null" class="nav-item">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0" style="height: 6vh;">
+                <li *ngIf="userName!=null" class="nav-item" style="margin-top:1vh;">
                     <a class="nav-link disabled" tabindex="-1" aria-disabled="true">{{userName}}</a>
                 </li>
-                <li *ngIf="userName!=null" class="nav-item">
+                <li *ngIf="userName!=null" class="nav-item" style="margin-top:1vh;">
                     <button (click)="logOut()" class="nav-link btn btn-outline-light" tabindex="-1" aria-disabled="true">Log out</button>
                 </li>
             </ul>
